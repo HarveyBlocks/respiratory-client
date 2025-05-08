@@ -7,7 +7,7 @@ import org.harvey.respiratory.net.properties.NetProperties;
 import java.util.Map;
 
 /**
- * TODO
+ * 符合Restful风格的Result
  *
  * @author <a href="mailto:harvey.blocks@outlook.com">Harvey Blocks</a>
  * @version 1.0

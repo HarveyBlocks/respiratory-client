@@ -7,7 +7,7 @@ import java.io.Reader;
 import java.util.Properties;
 
 /**
- * TODO
+ * 导入配置文件
  *
  * @author <a href="mailto:harvey.blocks@outlook.com">Harvey Blocks</a>
  * @version 1.0

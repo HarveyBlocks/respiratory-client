@@ -15,7 +15,7 @@ import java.util.Map;
  */
 class CorrespondenceTask {
     Channel channel;
-    HttpRequest request;
+    final HttpRequest request;
     DefaultPromise<String> contentPromise;
     DefaultPromise<Iterable<Map.Entry<String, String>>> headerPromise;
 

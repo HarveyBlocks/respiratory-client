@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.harvey.respiratory.net.vo.RestfulHttpResponse;
 
 /**
- * TODO
+ * {@link HttpClientExecutor} 的实现
  *
  * @author <a href="mailto:harvey.blocks@outlook.com">Harvey Blocks</a>
  * @version 1.0
