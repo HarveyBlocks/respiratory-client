@@ -20,11 +20,16 @@ import java.util.Map;
  */
 public class HttpRequestBuilder {
 
-    private final List<Map.Entry<String, String>> headers = new ArrayList<>();
+    private final List<Map.Entry<String, String>> headers;
+
+    public HttpRequestBuilder() {
+        headers = new ArrayList<>();
+        this.initHeaders();
+    }
 
     @AllArgsConstructor
     @Getter
-    private static class Header implements Map.Entry<String, String> {
+    public static class Header implements Map.Entry<String, String> {
         private final String key;
         private String value;
 
@@ -32,6 +37,19 @@ public class HttpRequestBuilder {
         public String setValue(String value) {
             return this.value = value;
         }
+    }
+
+    public HttpRequestBuilder resetHeaders(List<Header> headers) {
+        this.headers.clear();
+        initHeaders();
+        this.headers.addAll(headers);
+        return this;
+    }
+
+    private void initHeaders() {
+        addHeader(HttpHeaderNames.CONNECTION.toString(), HttpHeaderValues.KEEP_ALIVE.toString());
+        addHeader(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_JSON.toString());
+        addHeader(HttpHeaderNames.TRANSFER_ENCODING.toString(), HttpHeaderValues.CHUNKED.toString());
     }
 
     public HttpRequestBuilder addHeader(String header, String value) {
@@ -47,11 +65,7 @@ public class HttpRequestBuilder {
         for (Map.Entry<String, String> header : headers) {
             request.headers().add(header.getKey(), header.getValue());
         }
-        // 添加请求头，保持长连接
-        request.headers().add(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-        // 添加请求头，确定请求体的长度
-        request.headers().add(HttpHeaderNames.CONTENT_LENGTH, request.content().readableBytes());
-        request.headers().add(HttpHeaderNames.CONTENT_TYPE, HttpHeaderValues.APPLICATION_JSON);
+
 
         // 将请求实体写入出站处理器
         return request;
@@ -61,8 +75,13 @@ public class HttpRequestBuilder {
         return buildRequest(HttpMethod.GET, uri, "");
     }
 
+
     public <T> HttpRequest buildPostRequest(URI uri, T body) {
         return buildRequest(HttpMethod.POST, uri, JacksonUtil.toJsonStr(body));
+    }
+
+    public <T> HttpRequest buildPutRequest(URI uri, T body) {
+        return buildRequest(HttpMethod.PUT, uri, JacksonUtil.toJsonStr(body));
     }
 
     public <T> HttpRequest buildDeleteRequest(URI uri) {
