@@ -1,8 +1,6 @@
 package org.harvey.respiratory.net.correspondence;
 
 import io.netty.handler.codec.http.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.harvey.respiratory.net.JacksonUtil;
 
 import java.net.URI;
@@ -27,22 +25,11 @@ public class HttpRequestBuilder {
         this.initHeaders();
     }
 
-    @AllArgsConstructor
-    @Getter
-    public static class Header implements Map.Entry<String, String> {
-        private final String key;
-        private String value;
 
-        @Override
-        public String setValue(String value) {
-            return this.value = value;
-        }
-    }
-
-    public HttpRequestBuilder resetHeaders(List<Header> headers) {
+    public HttpRequestBuilder resetHeaders(List<HttpHeader> httpHeaders) {
         this.headers.clear();
         initHeaders();
-        this.headers.addAll(headers);
+        this.headers.addAll(httpHeaders);
         return this;
     }
 
@@ -53,7 +40,7 @@ public class HttpRequestBuilder {
     }
 
     public HttpRequestBuilder addHeader(String header, String value) {
-        this.headers.add(new Header(header, value));
+        this.headers.add(new HttpHeader(header, value));
         return this;
     }
 

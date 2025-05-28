@@ -2,8 +2,10 @@ package org.harvey.respiratory.net.vo;
 
 import lombok.Getter;
 import org.harvey.respiratory.net.JacksonUtil;
+import org.harvey.respiratory.net.correspondence.HttpHeader;
 import org.harvey.respiratory.net.properties.NetProperties;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -18,13 +20,15 @@ public class RestfulHttpResponse {
     public static final String CODE_FIELD = NetProperties.DEFAULT.get(NetProperties.PropertyName.CODE_FIELD);
     public static final String DATA_FIELD = NetProperties.DEFAULT.get(NetProperties.PropertyName.DATA_FIELD);
     public static final String MESSAGE_FIELD = NetProperties.DEFAULT.get(NetProperties.PropertyName.MESSAGE_FIELD);
-    private final Iterable<Map.Entry<String, String>> headers;
+    private final Iterable<HttpHeader> headers;
     private final int code;
     private final String message;
     private final String data;
 
     public RestfulHttpResponse(Iterable<Map.Entry<String, String>> headers, String content) {
-        this.headers = headers;
+        ArrayList<HttpHeader> list = new ArrayList<>();
+        headers.forEach(e -> list.add(new HttpHeader(e)));
+        this.headers = list;
         Map<String, String> map = JacksonUtil.toStringMap(content);
         this.code = Integer.parseInt(map.get(CODE_FIELD));//"code";
         this.data = map.get(DATA_FIELD);//data;
