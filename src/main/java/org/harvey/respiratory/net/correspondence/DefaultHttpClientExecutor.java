@@ -30,7 +30,7 @@ class DefaultHttpClientExecutor implements HttpClientExecutor {
         try {
             synchronized (this) {
                 // 代理类
-                Channel channel = this.manager.peekTask().channel;
+                Channel channel = this.manager.peekTask().getChannel();
                 ChannelFuture channelFuture = channel.closeFuture();
                 channelFuture.addListener(future -> {
                     channel.close();
@@ -44,21 +44,19 @@ class DefaultHttpClientExecutor implements HttpClientExecutor {
     }
 
 
-
     private RestfulHttpResponse syncReceive() {
         // 放入Map
         try {
             // 等待响应
             CorrespondenceTask task = manager.peekTask();
-            task.headerPromise.await(); // sync() 会自动抛异常, await不会自动抛异常
-            task.contentPromise.await();
+            task.waitResponse(); // sync() 会自动抛异常, await不会自动抛异常
             // 我们要自己通过Success方法来检查
-            if (task.headerPromise.isSuccess() && task.contentPromise.isSuccess()) {
-                return new RestfulHttpResponse(task.headerPromise.get(), task.contentPromise.get());
-            } else if (!task.headerPromise.isSuccess()) {
-                throw task.headerPromise.cause();
-            } else if (!task.contentPromise.isSuccess()) {
-                throw task.contentPromise.cause();
+            if (task.isSuccess()) {
+                return new RestfulHttpResponse(task.getHeader(), task.getContent());
+            } else if (!task.isHeadersSuccess()) {
+                throw task.headerCause();
+            } else if (!task.isContentSuccess()) {
+                throw task.contentCause();
             }
         } catch (Throwable e) {
             throw new RuntimeException(e.getMessage(), e);

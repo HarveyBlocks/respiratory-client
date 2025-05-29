@@ -8,7 +8,8 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.util.concurrent.DefaultPromise;
+import lombok.extern.slf4j.Slf4j;
+import org.harvey.respiratory.net.exception.ClientRequesException;
 import org.harvey.respiratory.net.properties.NetProperties;
 import org.harvey.respiratory.net.vo.RestfulHttpResponse;
 
@@ -23,6 +24,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @version 1.0
  * @date 2025-05-08 02:22
  */
+@Slf4j
 public class HttpClientManager {
     public static final String HOST = NetProperties.DEFAULT.get(NetProperties.PropertyName.HOST);
     public static final int PORT = Integer.parseInt(NetProperties.DEFAULT.get(NetProperties.PropertyName.PORT));
@@ -68,8 +70,18 @@ public class HttpClientManager {
                 // 即时删除Map中无用的promise
                 // promise set 之后, 就会唤醒await()
                 Iterable<Map.Entry<String, String>> headers = response.headers();
-                peekTask().headerPromise.setSuccess(headers);
-                ctx.writeAndFlush(response);
+                HttpResponseStatus status = response.status();
+                System.out.println(status);
+                int code = status.code();
+
+                if (200 <= code && code < 300) {
+                    log.info("response status = {}", status);
+                    peekTask().setHeaders(headers);
+                    ctx.writeAndFlush(response);
+                }else {
+                    log.error("response status = {}", status);
+                    throw new ClientRequesException(status);
+                }
             }
 
         };
@@ -78,8 +90,7 @@ public class HttpClientManager {
             protected void channelRead0(
                     ChannelHandlerContext ctx, DefaultHttpContent content) {
                 String string = content.content().toString(Charset.defaultCharset());
-                DefaultPromise<String> contentPromise = peekTask().contentPromise;
-                contentPromise.setSuccess(string);
+                peekTask().setContent(string);
             }
         };
         return new ChannelInitializer<>() {
@@ -116,7 +127,6 @@ public class HttpClientManager {
         channel.writeAndFlush(request).sync();
         return executor.execute();
     }
-
 
 
 }

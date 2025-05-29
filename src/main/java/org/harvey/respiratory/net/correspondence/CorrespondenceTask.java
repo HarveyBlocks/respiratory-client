@@ -2,8 +2,10 @@ package org.harvey.respiratory.net.correspondence;
 
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.DefaultPromise;
+import lombok.Getter;
 
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * TODO
@@ -13,16 +15,56 @@ import java.util.Map;
  * @date 2025-05-08 11:41
  */
 class CorrespondenceTask {
-    final Channel channel;
-
-    final DefaultPromise<String> contentPromise;
-    final DefaultPromise<Iterable<Map.Entry<String, String>>> headerPromise;
-
+    private final DefaultPromise<String> contentPromise;
+    private final DefaultPromise<Iterable<Map.Entry<String, String>>> headerPromise;
+    @Getter
+    private final Channel channel;
     CorrespondenceTask(Channel channel) {
         this.channel = channel;
-         this.contentPromise = new DefaultPromise<>(channel.eventLoop());
-         this.headerPromise = new DefaultPromise<>(channel.eventLoop());
+        this.contentPromise = new DefaultPromise<>(channel.eventLoop());
+        this.headerPromise = new DefaultPromise<>(channel.eventLoop());
     }
 
+
+    public void setHeaders(Iterable<Map.Entry<String, String>> headers) {
+        this.headerPromise.setSuccess(headers);
+    }
+
+    public void setContent(String content) {
+        this.contentPromise.setSuccess(content);
+    }
+
+    public void waitResponse() throws InterruptedException {
+        this.headerPromise.wait();
+        this.contentPromise.wait();
+    }
+
+    public boolean isSuccess() {
+        return this.headerPromise.isSuccess() && this.contentPromise.isSuccess();
+    }
+
+    public boolean isHeadersSuccess() {
+        return this.headerPromise.isSuccess();
+    }
+
+    public Throwable headerCause() {
+        return this.headerPromise.cause();
+    }
+
+    public boolean isContentSuccess() {
+        return this.contentPromise.isSuccess();
+    }
+
+    public Throwable contentCause() {
+        return this.contentPromise.cause();
+    }
+
+    public Iterable<Map.Entry<String, String>> getHeader() throws ExecutionException, InterruptedException {
+        return this.headerPromise.get();
+    }
+
+    public String getContent() throws ExecutionException, InterruptedException {
+        return this.contentPromise.get();
+    }
 
 }
