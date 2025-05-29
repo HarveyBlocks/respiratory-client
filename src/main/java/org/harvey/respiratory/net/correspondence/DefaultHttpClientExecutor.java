@@ -22,21 +22,16 @@ class DefaultHttpClientExecutor implements HttpClientExecutor {
 
     @Override
     public RestfulHttpResponse execute() throws InterruptedException {
-        execute(null);
+        execute0();
         return syncReceive();
     }
 
-    @Override
-    public void execute(ResponseListener listener) {
+    private void execute0() {
         try {
             synchronized (this) {
                 // 代理类
                 Channel channel = this.manager.peekTask().channel;
                 ChannelFuture channelFuture = channel.closeFuture();
-                if (listener != null) {
-                    // 异步
-                    channelFuture.addListener(future -> listener.listen(syncReceive()));
-                }
                 channelFuture.addListener(future -> {
                     channel.close();
                     manager.pollTask();
@@ -47,7 +42,6 @@ class DefaultHttpClientExecutor implements HttpClientExecutor {
             throw e;
         }
     }
-
 
 
 

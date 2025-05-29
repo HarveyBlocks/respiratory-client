@@ -14,8 +14,5 @@ public interface HttpClientExecutor {
      * 阻塞执行
      */
     RestfulHttpResponse execute() throws InterruptedException;
-    /**
-     * 同步执行
-     */
-    void execute(ResponseListener listener);
+
 }

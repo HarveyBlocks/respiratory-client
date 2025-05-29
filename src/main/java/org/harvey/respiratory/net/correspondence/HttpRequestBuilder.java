@@ -67,12 +67,4 @@ public class HttpRequestBuilder {
     public <T> HttpRequest buildPostRequest(URI uri, T body) {
         return buildRequest(HttpMethod.POST, uri, JacksonUtil.toJsonStr(body));
     }
-
-    public <T> HttpRequest buildPutRequest(URI uri, T body) {
-        return buildRequest(HttpMethod.PUT, uri, JacksonUtil.toJsonStr(body));
-    }
-
-    public <T> HttpRequest buildDeleteRequest(URI uri) {
-        return buildRequest(HttpMethod.DELETE, uri, "");
-    }
 }

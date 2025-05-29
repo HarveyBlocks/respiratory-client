@@ -117,16 +117,6 @@ public class HttpClientManager {
         return executor.execute();
     }
 
-    public void execute(HttpRequest request, ResponseListener listener) {
-        // 连接
-        ChannelFuture connectFuture = this.bootstrap.connect(HOST, PORT);
-        connectFuture.addListener(cfuture -> {
-            // 完成连接
-            Channel channel = connectFuture.sync().channel();
-            channel.writeAndFlush(request).addListener(wfuture -> executor.execute(listener));
-        });
-
-    }
 
 
 }

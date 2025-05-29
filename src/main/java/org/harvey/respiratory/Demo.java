@@ -17,7 +17,7 @@ import java.net.URISyntaxException;
 @Slf4j(topic = "demo")
 public class Demo {
     public static void main(String[] args) {
-        demo2();
+        demo1();
     }
 
     public static final HttpClientManager MANAGER = new HttpClientManager();
@@ -37,16 +37,5 @@ public class Demo {
 
 
 
-    public static void demo2() {
-        // 异步获取响应
-        HttpRequest request;
-        try {
-            request = REQUEST_BUILDER.buildGetRequest(new URI("/hello"));
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        MANAGER.execute(request, response -> log.info("{}",response));
-        log.info("证明异步, 执行了接下来的语句");
-    }
 
 }
