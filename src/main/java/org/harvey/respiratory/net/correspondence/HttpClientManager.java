@@ -5,10 +5,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.DefaultHttpContent;
-import io.netty.handler.codec.http.DefaultHttpResponse;
-import io.netty.handler.codec.http.HttpClientCodec;
-import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.*;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultPromise;
@@ -30,6 +27,7 @@ public class HttpClientManager {
     public static final String HOST = NetProperties.DEFAULT.get(NetProperties.PropertyName.HOST);
     public static final int PORT = Integer.parseInt(NetProperties.DEFAULT.get(NetProperties.PropertyName.PORT));
     public static final LogLevel LOG_LEVEL = LogLevel.INFO;
+    public final HttpClientExecutor executor = new DefaultHttpClientExecutor(this);
     private final NioEventLoopGroup group = new NioEventLoopGroup();
     private final Bootstrap bootstrap;
 
@@ -58,22 +56,19 @@ public class HttpClientManager {
     private ChannelInitializer<SocketChannel> getHandlerInitializer() {
         LoggingHandler loggingHandler = new LoggingHandler(LOG_LEVEL);
         HttpClientCodec messageCodec = new HttpClientCodec();
-        SimpleChannelInboundHandler<DefaultHttpResponse> responseHandler = new SimpleChannelInboundHandler<>() {
+        SimpleChannelInboundHandler<HttpResponse> responseHandler = new SimpleChannelInboundHandler<>() {
             @Override
-            public void channelActive(ChannelHandlerContext ctx) {
-                // 创建开始就报废 , 合理吗?
-                HttpRequest request = peekTask().request;
-                ctx.writeAndFlush(request);
+            public void channelActive(ChannelHandlerContext ctx) throws Exception {
+                offerTask(ctx.channel());
+                ctx.fireChannelActive();
             }
 
             @Override
-            public void channelRead0(ChannelHandlerContext ctx, DefaultHttpResponse response) {
+            public void channelRead0(ChannelHandlerContext ctx, HttpResponse response) {
                 // 即时删除Map中无用的promise
                 // promise set 之后, 就会唤醒await()
                 Iterable<Map.Entry<String, String>> headers = response.headers();
-                DefaultPromise<Iterable<Map.Entry<String, String>>> requestPromise = peekTask()
-                        .buildRequestPromise(ctx.channel());
-                requestPromise.setSuccess(headers);
+                peekTask().headerPromise.setSuccess(headers);
                 ctx.writeAndFlush(response);
             }
 
@@ -82,8 +77,9 @@ public class HttpClientManager {
             @Override
             protected void channelRead0(
                     ChannelHandlerContext ctx, DefaultHttpContent content) {
-                DefaultPromise<String> contentPromise = peekTask().buildContentPromise(ctx.channel());
-                contentPromise.setSuccess(content.content().toString(Charset.defaultCharset()));
+                String string = content.content().toString(Charset.defaultCharset());
+                DefaultPromise<String> contentPromise = peekTask().contentPromise;
+                contentPromise.setSuccess(string);
             }
         };
         return new ChannelInitializer<>() {
@@ -98,6 +94,10 @@ public class HttpClientManager {
         };
     }
 
+    private void offerTask(Channel channel) {
+        queue.offer(new CorrespondenceTask(channel));
+    }
+
     CorrespondenceTask peekTask() {
         CorrespondenceTask task = queue.peek();
         if (task == null) {
@@ -106,28 +106,24 @@ public class HttpClientManager {
         return task;
     }
 
-    void poolTask() {
+    void pollTask() {
         this.queue.poll();
     }
 
 
     public RestfulHttpResponse execute(HttpRequest request) throws InterruptedException {
-        CorrespondenceTask task = new CorrespondenceTask(request);
-        queue.offer(task);
-        ChannelFuture channelFuture = this.bootstrap.connect(HOST, PORT);
-        task.channel = channelFuture.sync().channel();
-        HttpClientExecutor executor = new DefaultHttpClientExecutor(this);
+        Channel channel = this.bootstrap.connect(HOST, PORT).sync().channel();
+        channel.writeAndFlush(request).sync();
         return executor.execute();
     }
 
     public void execute(HttpRequest request, ResponseListener listener) throws InterruptedException {
-        CorrespondenceTask task = new CorrespondenceTask(request);
-        queue.offer(task);
-        ChannelFuture channelFuture = this.bootstrap.connect(HOST, PORT);
-        channelFuture.addListener(future -> {
-            task.channel = channelFuture.sync().channel();
-            HttpClientExecutor executor = new DefaultHttpClientExecutor(this);
-            executor.execute(listener);
+        // 连接
+        ChannelFuture connectFuture = this.bootstrap.connect(HOST, PORT);
+        connectFuture.addListener(cfuture -> {
+            // 完成连接
+            Channel channel = connectFuture.sync().channel();
+            channel.writeAndFlush(request).addListener(wfuture -> executor.execute(listener));
         });
 
     }

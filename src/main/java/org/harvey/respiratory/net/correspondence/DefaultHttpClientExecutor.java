@@ -1,6 +1,7 @@
 package org.harvey.respiratory.net.correspondence;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.harvey.respiratory.net.vo.RestfulHttpResponse;
 
@@ -20,26 +21,25 @@ class DefaultHttpClientExecutor implements HttpClientExecutor {
     }
 
     @Override
-    public RestfulHttpResponse execute() {
+    public RestfulHttpResponse execute() throws InterruptedException {
         execute(null);
         return syncReceive();
     }
 
     @Override
-    public void execute(ResponseListener listener) {
+    public void execute(ResponseListener listener) throws InterruptedException {
         try {
             synchronized (this) {
                 // 代理类
                 Channel channel = this.manager.peekTask().channel;
-                channel.closeFuture().addListener(
-                        future -> {
-                            if (listener != null) {
-                                listener.listen(syncReceive());
-                            }
-                        }
-                ).addListener(future -> {
+                ChannelFuture channelFuture = channel.closeFuture();
+                if (listener != null) {
+                    // 异步
+                    channelFuture.addListener(future -> listener.listen(syncReceive()));
+                }
+                channelFuture.addListener(future -> {
                     channel.close();
-                    manager.poolTask();
+                    manager.pollTask();
                 });
             }
         } catch (Throwable e) {
@@ -47,6 +47,8 @@ class DefaultHttpClientExecutor implements HttpClientExecutor {
             throw e;
         }
     }
+
+
 
 
     private RestfulHttpResponse syncReceive() {
@@ -58,17 +60,14 @@ class DefaultHttpClientExecutor implements HttpClientExecutor {
             task.contentPromise.await();
             // 我们要自己通过Success方法来检查
             if (task.headerPromise.isSuccess() && task.contentPromise.isSuccess()) {
-                return new RestfulHttpResponse(
-                        task.headerPromise.get(),
-                        task.contentPromise.get()
-                );
+                return new RestfulHttpResponse(task.headerPromise.get(), task.contentPromise.get());
             } else if (!task.headerPromise.isSuccess()) {
                 throw task.headerPromise.cause();
             } else if (!task.contentPromise.isSuccess()) {
                 throw task.contentPromise.cause();
             }
         } catch (Throwable e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e.getMessage(), e);
         }
         return null;
     }

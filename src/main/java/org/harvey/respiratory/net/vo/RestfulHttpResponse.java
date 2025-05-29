@@ -1,12 +1,13 @@
 package org.harvey.respiratory.net.vo;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import org.harvey.respiratory.net.JacksonUtil;
-import org.harvey.respiratory.net.correspondence.HttpHeader;
 import org.harvey.respiratory.net.properties.NetProperties;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.StringJoiner;
 
 /**
  * 符合Restful风格的Result
@@ -15,41 +16,36 @@ import java.util.Map;
  * @version 1.0
  * @date 2025-05-08 02:19
  */
-@Getter
 public class RestfulHttpResponse {
-    public static final String CODE_FIELD = NetProperties.DEFAULT.get(NetProperties.PropertyName.CODE_FIELD);
-    public static final String DATA_FIELD = NetProperties.DEFAULT.get(NetProperties.PropertyName.DATA_FIELD);
-    public static final String MESSAGE_FIELD = NetProperties.DEFAULT.get(NetProperties.PropertyName.MESSAGE_FIELD);
+
+
+    private final String content;
+    @Getter
     private final Iterable<HttpHeader> headers;
-    private final int code;
-    private final String message;
-    private final String data;
 
     public RestfulHttpResponse(Iterable<Map.Entry<String, String>> headers, String content) {
         ArrayList<HttpHeader> list = new ArrayList<>();
         headers.forEach(e -> list.add(new HttpHeader(e)));
         this.headers = list;
-        Map<String, String> map = JacksonUtil.toStringMap(content);
-        this.code = Integer.parseInt(map.get(CODE_FIELD));//"code";
-        this.data = map.get(DATA_FIELD);//data;
-        this.message = map.get(MESSAGE_FIELD);//msg;
+        if (content == null || content.isEmpty()) {
+            throw new IllegalStateException("被服务器拒绝");
+        }
+        this.content = content;
     }
 
-    public <T> T getData(Class<T> targetType) {
-        return JacksonUtil.toBean(data, targetType);
+    public <T> RestfulResult<T> getData() {
+        return JacksonUtil.toBean(content, new TypeReference<>() {
+        });
     }
 
-    public boolean success() {
-        return code == 200;
-    }
 
     @Override
     public String toString() {
+        StringJoiner joiner = new StringJoiner(",");
+        headers.forEach(h -> joiner.add(h.getKey() + ":" + h.getValue()));
         return "RestfulHttpResponse{" +
-               "headers=" + headers +
-               ", code=" + code +
-               ", message='" + message + '\'' +
-               ", data='" + data + '\'' +
+               "content='" + content + '\'' +
+               ", headers=" + joiner +
                '}';
     }
 }

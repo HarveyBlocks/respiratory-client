@@ -14,22 +14,16 @@ import java.util.Map;
  * @date 2025-05-08 11:41
  */
 class CorrespondenceTask {
-    Channel channel;
-    final HttpRequest request;
-    DefaultPromise<String> contentPromise;
-    DefaultPromise<Iterable<Map.Entry<String, String>>> headerPromise;
+    final Channel channel;
 
-    CorrespondenceTask(HttpRequest request) {
-        this.request = request;
-    }
+    final DefaultPromise<String> contentPromise;
+    final DefaultPromise<Iterable<Map.Entry<String, String>>> headerPromise;
 
-    public DefaultPromise<String> buildContentPromise(Channel channel) {
+    CorrespondenceTask(Channel channel) {
         this.channel = channel;
-        return this.contentPromise = new DefaultPromise<>(channel.eventLoop());
+         this.contentPromise = new DefaultPromise<>(channel.eventLoop());
+         this.headerPromise = new DefaultPromise<>(channel.eventLoop());
     }
 
-    public DefaultPromise<Iterable<Map.Entry<String, String>>> buildRequestPromise(Channel channel) {
-        this.channel = channel;
-        return this.headerPromise = new DefaultPromise<>(channel.eventLoop());
-    }
+
 }

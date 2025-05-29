@@ -2,6 +2,7 @@ package org.harvey.respiratory.net.correspondence;
 
 import io.netty.handler.codec.http.*;
 import org.harvey.respiratory.net.JacksonUtil;
+import org.harvey.respiratory.net.vo.HttpHeader;
 
 import java.net.URI;
 import java.nio.charset.Charset;

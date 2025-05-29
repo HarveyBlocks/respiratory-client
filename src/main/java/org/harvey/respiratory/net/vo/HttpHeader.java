@@ -1,4 +1,4 @@
-package org.harvey.respiratory.net.correspondence;
+package org.harvey.respiratory.net.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,4 +26,5 @@ public  class HttpHeader implements Map.Entry<String, String> {
     public String setValue(String value) {
         return this.value = value;
     }
+
 }
