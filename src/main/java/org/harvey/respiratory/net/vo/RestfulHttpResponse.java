@@ -3,7 +3,6 @@ package org.harvey.respiratory.net.vo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import org.harvey.respiratory.net.JacksonUtil;
-import org.harvey.respiratory.net.properties.NetProperties;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -33,7 +32,7 @@ public class RestfulHttpResponse {
         this.content = content;
     }
 
-    public <T> RestfulResult<T> getData() {
+    public <T> RestfulResult<T> buildData() {
         return JacksonUtil.toBean(content, new TypeReference<>() {
         });
     }

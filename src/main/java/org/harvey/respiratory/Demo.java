@@ -39,12 +39,13 @@ public class Demo {
 
     public static void demo2() {
         // 异步获取响应
+        HttpRequest request;
         try {
-            HttpRequest request = REQUEST_BUILDER.buildGetRequest(new URI("/hello"));
-            MANAGER.execute(request, response -> log.info("{}",response));
-        } catch (InterruptedException | URISyntaxException e) {
+            request = REQUEST_BUILDER.buildGetRequest(new URI("/hello"));
+        } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+        MANAGER.execute(request, response -> log.info("{}",response));
         log.info("证明异步, 执行了接下来的语句");
     }
 

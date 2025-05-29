@@ -27,7 +27,7 @@ class DefaultHttpClientExecutor implements HttpClientExecutor {
     }
 
     @Override
-    public void execute(ResponseListener listener) throws InterruptedException {
+    public void execute(ResponseListener listener) {
         try {
             synchronized (this) {
                 // 代理类

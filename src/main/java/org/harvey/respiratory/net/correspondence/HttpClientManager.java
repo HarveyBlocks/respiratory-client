@@ -58,7 +58,7 @@ public class HttpClientManager {
         HttpClientCodec messageCodec = new HttpClientCodec();
         SimpleChannelInboundHandler<HttpResponse> responseHandler = new SimpleChannelInboundHandler<>() {
             @Override
-            public void channelActive(ChannelHandlerContext ctx) throws Exception {
+            public void channelActive(ChannelHandlerContext ctx) {
                 offerTask(ctx.channel());
                 ctx.fireChannelActive();
             }
@@ -117,7 +117,7 @@ public class HttpClientManager {
         return executor.execute();
     }
 
-    public void execute(HttpRequest request, ResponseListener listener) throws InterruptedException {
+    public void execute(HttpRequest request, ResponseListener listener) {
         // 连接
         ChannelFuture connectFuture = this.bootstrap.connect(HOST, PORT);
         connectFuture.addListener(cfuture -> {

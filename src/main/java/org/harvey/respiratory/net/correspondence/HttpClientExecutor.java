@@ -17,5 +17,5 @@ public interface HttpClientExecutor {
     /**
      * 同步执行
      */
-    void execute(ResponseListener listener) throws InterruptedException;
+    void execute(ResponseListener listener);
 }

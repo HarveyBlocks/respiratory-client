@@ -1,16 +1,11 @@
 package org.harvey.respiratory.net;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.harvey.respiratory.net.vo.RestfulResult;
 
-import javax.management.relation.Role;
 import java.io.IOException;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

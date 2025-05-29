@@ -90,7 +90,7 @@ public class DemoTest {
             throw new RuntimeException(e);
         }
         log.info("response = {}", response);
-        RestfulResult<UserDto> data = response.getData();
+        RestfulResult<UserDto> data = response.buildData();
         log.info("data = {}", data);
     }
 }

@@ -1,7 +1,6 @@
 package org.harvey.respiratory.net.correspondence;
 
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.concurrent.DefaultPromise;
 
 import java.util.Map;

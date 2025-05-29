@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.harvey.respiratory.net.properties.NetProperties;
 
 /**
- * TODO
+ * Restful风格的数据
  *
  * @author <a href="mailto:harvey.blocks@outlook.com">Harvey Blocks</a>
  * @version 1.0
