@@ -9,8 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.harvey.respiratory.Demo;
 import org.harvey.respiratory.net.correspondence.HttpClientManager;
 import org.harvey.respiratory.net.correspondence.HttpRequestBuilder;
-import org.harvey.respiratory.net.vo.RestfulHttpResponse;
+import org.harvey.respiratory.net.exception.ClientRequesException;
 import org.harvey.respiratory.net.vo.RestfulResult;
+import org.harvey.respiratory.net.vo.SuccessfulHttpResponse;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -32,7 +33,7 @@ public class DemoTest {
 
     @Test
     public void sendCode() {
-        RestfulHttpResponse response;
+        SuccessfulHttpResponse response;
         try {
             HttpRequest request = REQUEST_BUILDER.buildPostRequest(new URI("/user/code"), "18299382839");
             response = MANAGER.execute(request);
@@ -44,7 +45,7 @@ public class DemoTest {
 
     @Test
     public void login() {
-        RestfulHttpResponse response;
+        SuccessfulHttpResponse response;
         try {
             Map<String, Object> loginForm = Map.of("code", "463499", "phone", "18299382839", "password", "");
             HttpRequest request = REQUEST_BUILDER.buildPostRequest(new URI("/user/login"), loginForm);
@@ -81,11 +82,13 @@ public class DemoTest {
 
     @Test
     public void me() {
-        RestfulHttpResponse response;
+        SuccessfulHttpResponse response;
         try {
             REQUEST_BUILDER.addHeader("authorization", AUTHORIZATION_TOKEN);
             HttpRequest request = REQUEST_BUILDER.buildGetRequest(new URI("/user/me"));
             response = MANAGER.execute(request);
+        } catch (ClientRequesException ce) {
+            throw new RuntimeException(ce.getErrorResponse().toString());
         } catch (InterruptedException | URISyntaxException e) {
             throw new RuntimeException(e);
         }

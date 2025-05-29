@@ -1,7 +1,7 @@
 package org.harvey.respiratory.net.exception;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
 import lombok.Getter;
+import org.harvey.respiratory.net.vo.ErrorResponse;
 
 /**
  * TODO  ClientReques的异常
@@ -12,42 +12,39 @@ import lombok.Getter;
  */
 @Getter
 public class ClientRequesException extends RuntimeException {
-    private final int code;
-    private final String reasonPhrase;
+    private final ErrorResponse errorResponse;
 
-    public ClientRequesException(HttpResponseStatus status, String message) {
+    public ClientRequesException(
+            ErrorResponse response, String message) {
         super(message);
-        this.code = status.code();
-        this.reasonPhrase = status.reasonPhrase();
+        this.errorResponse = response;
     }
 
-    public ClientRequesException(HttpResponseStatus status, String message, Throwable cause) {
+    public ClientRequesException(
+            ErrorResponse response, String message, Throwable cause) {
         super(message, cause);
-        this.code = status.code();
-        this.reasonPhrase = status.reasonPhrase();
+        this.errorResponse = response;
     }
 
-    public ClientRequesException(HttpResponseStatus status, Throwable cause) {
+    public ClientRequesException(
+            ErrorResponse response, Throwable cause) {
         super(cause);
-        this.code = status.code();
-        this.reasonPhrase = status.reasonPhrase();
+        this.errorResponse = response;
     }
 
     protected ClientRequesException(
-            HttpResponseStatus status,
+            ErrorResponse response,
             String message,
             Throwable cause,
             boolean enableSuppression,
             boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
-        this.code = status.code();
-        this.reasonPhrase = status.reasonPhrase();
+        this.errorResponse = response;
     }
 
 
-    public ClientRequesException(HttpResponseStatus status) {
-        super(status.toString());
-        this.code = status.code();
-        this.reasonPhrase = status.reasonPhrase();
+    public ClientRequesException(ErrorResponse response) {
+        super();
+        this.errorResponse = response;
     }
 }

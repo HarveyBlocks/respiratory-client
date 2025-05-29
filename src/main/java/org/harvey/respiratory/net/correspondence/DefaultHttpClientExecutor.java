@@ -3,7 +3,9 @@ package org.harvey.respiratory.net.correspondence;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import lombok.extern.slf4j.Slf4j;
-import org.harvey.respiratory.net.vo.RestfulHttpResponse;
+import org.harvey.respiratory.net.exception.ClientRequesException;
+import org.harvey.respiratory.net.vo.ErrorResponse;
+import org.harvey.respiratory.net.vo.SuccessfulHttpResponse;
 
 /**
  * {@link HttpClientExecutor} 的实现
@@ -21,7 +23,7 @@ class DefaultHttpClientExecutor implements HttpClientExecutor {
     }
 
     @Override
-    public RestfulHttpResponse execute() throws InterruptedException {
+    public SuccessfulHttpResponse execute() throws InterruptedException {
         execute0();
         return syncReceive();
     }
@@ -30,7 +32,8 @@ class DefaultHttpClientExecutor implements HttpClientExecutor {
         try {
             synchronized (this) {
                 // 代理类
-                Channel channel = this.manager.peekTask().getChannel();
+                CorrespondenceTask task = this.manager.peekTask();
+                Channel channel = task.getChannel();
                 ChannelFuture channelFuture = channel.closeFuture();
                 channelFuture.addListener(future -> {
                     channel.close();
@@ -39,29 +42,34 @@ class DefaultHttpClientExecutor implements HttpClientExecutor {
             }
         } catch (Throwable e) {
             log.error("client error", e);
-            throw e;
+            throw new RuntimeException(e);
         }
     }
 
 
-    private RestfulHttpResponse syncReceive() {
+    private SuccessfulHttpResponse syncReceive() {
         // 放入Map
         try {
             // 等待响应
             CorrespondenceTask task = manager.peekTask();
-            task.waitResponse(); // sync() 会自动抛异常, await不会自动抛异常
+            task.awaitResponse(); // sync() 会自动抛异常, await不会自动抛异常
             // 我们要自己通过Success方法来检查
-            if (task.isSuccess()) {
-                return new RestfulHttpResponse(task.getHeader(), task.getContent());
-            } else if (!task.isHeadersSuccess()) {
-                throw task.headerCause();
-            } else if (!task.isContentSuccess()) {
+            if (!task.isContentSuccess()) {
                 throw task.contentCause();
             }
+            if (!task.isHeadersSuccess()) {
+                throw task.headerCause();
+            }
+            ErrorResponse errorResponse = task.getErrorResponse();
+            if (errorResponse != null) {
+                errorResponse.setContent(task.getContent());
+                throw new ClientRequesException(errorResponse);
+            }
+            return new SuccessfulHttpResponse(task.getHeader(), task.getContent());
         } catch (Throwable e) {
             throw new RuntimeException(e.getMessage(), e);
         }
-        return null;
+
     }
 
 

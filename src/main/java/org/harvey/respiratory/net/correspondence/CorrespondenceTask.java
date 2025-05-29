@@ -3,6 +3,8 @@ package org.harvey.respiratory.net.correspondence;
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.DefaultPromise;
 import lombok.Getter;
+import lombok.Setter;
+import org.harvey.respiratory.net.vo.ErrorResponse;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -19,6 +21,10 @@ class CorrespondenceTask {
     private final DefaultPromise<Iterable<Map.Entry<String, String>>> headerPromise;
     @Getter
     private final Channel channel;
+    @Getter
+    @Setter
+    private ErrorResponse errorResponse;
+
     CorrespondenceTask(Channel channel) {
         this.channel = channel;
         this.contentPromise = new DefaultPromise<>(channel.eventLoop());
@@ -34,9 +40,9 @@ class CorrespondenceTask {
         this.contentPromise.setSuccess(content);
     }
 
-    public void waitResponse() throws InterruptedException {
-        this.headerPromise.wait();
-        this.contentPromise.wait();
+    public void awaitResponse() throws InterruptedException {
+        this.contentPromise.await();
+        this.headerPromise.await();
     }
 
     public boolean isSuccess() {
@@ -66,5 +72,8 @@ class CorrespondenceTask {
     public String getContent() throws ExecutionException, InterruptedException {
         return this.contentPromise.get();
     }
+
+
+
 
 }

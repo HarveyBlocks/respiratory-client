@@ -1,7 +1,7 @@
 package org.harvey.respiratory.net.correspondence;
 
 
-import org.harvey.respiratory.net.vo.RestfulHttpResponse;
+import org.harvey.respiratory.net.vo.SuccessfulHttpResponse;
 
 /**
  * @author <a href="mailto:harvey.blocks@outlook.com">Harvey Blocks</a>
@@ -13,6 +13,6 @@ public interface HttpClientExecutor {
     /**
      * 阻塞执行
      */
-    RestfulHttpResponse execute() throws InterruptedException;
+    SuccessfulHttpResponse execute() throws InterruptedException;
 
 }

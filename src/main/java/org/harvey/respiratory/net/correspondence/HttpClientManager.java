@@ -9,9 +9,9 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.harvey.respiratory.net.exception.ClientRequesException;
 import org.harvey.respiratory.net.properties.NetProperties;
-import org.harvey.respiratory.net.vo.RestfulHttpResponse;
+import org.harvey.respiratory.net.vo.ErrorResponse;
+import org.harvey.respiratory.net.vo.SuccessfulHttpResponse;
 
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -58,30 +58,32 @@ public class HttpClientManager {
     private ChannelInitializer<SocketChannel> getHandlerInitializer() {
         LoggingHandler loggingHandler = new LoggingHandler(LOG_LEVEL);
         HttpClientCodec messageCodec = new HttpClientCodec();
-        SimpleChannelInboundHandler<HttpResponse> responseHandler = new SimpleChannelInboundHandler<>() {
+        ChannelInboundHandlerAdapter activeAdapter = new ChannelInboundHandlerAdapter() {
             @Override
-            public void channelActive(ChannelHandlerContext ctx) {
+            public void channelActive(ChannelHandlerContext ctx) throws Exception {
                 offerTask(ctx.channel());
                 ctx.fireChannelActive();
             }
+        };
+
+        SimpleChannelInboundHandler<HttpResponse> responseHandler = new SimpleChannelInboundHandler<>() {
 
             @Override
             public void channelRead0(ChannelHandlerContext ctx, HttpResponse response) {
                 // 即时删除Map中无用的promise
                 // promise set 之后, 就会唤醒await()
+                CorrespondenceTask task = peekTask();
                 Iterable<Map.Entry<String, String>> headers = response.headers();
                 HttpResponseStatus status = response.status();
-                System.out.println(status);
                 int code = status.code();
-
                 if (200 <= code && code < 300) {
                     log.info("response status = {}", status);
-                    peekTask().setHeaders(headers);
-                    ctx.writeAndFlush(response);
-                }else {
+                } else {
                     log.error("response status = {}", status);
-                    throw new ClientRequesException(status);
+                    task.setErrorResponse(new ErrorResponse(code, status.reasonPhrase(), headers));
                 }
+                task.setHeaders(headers);
+                ctx.fireChannelRead(response);
             }
 
         };
@@ -99,6 +101,7 @@ public class HttpClientManager {
                 ChannelPipeline pipeline = ch.pipeline();
                 pipeline.addLast(loggingHandler);
                 pipeline.addLast(messageCodec);
+                pipeline.addLast(activeAdapter);
                 pipeline.addLast(responseHandler);
                 pipeline.addLast(contentHandler);
             }
@@ -122,7 +125,7 @@ public class HttpClientManager {
     }
 
 
-    public RestfulHttpResponse execute(HttpRequest request) throws InterruptedException {
+    public SuccessfulHttpResponse execute(HttpRequest request) throws InterruptedException {
         Channel channel = this.bootstrap.connect(HOST, PORT).sync().channel();
         channel.writeAndFlush(request).sync();
         return executor.execute();

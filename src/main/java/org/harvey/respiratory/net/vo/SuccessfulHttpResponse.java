@@ -15,14 +15,12 @@ import java.util.StringJoiner;
  * @version 1.0
  * @date 2025-05-08 02:19
  */
-public class RestfulHttpResponse {
-
-
+public class SuccessfulHttpResponse {
     private final String content;
     @Getter
     private final Iterable<HttpHeader> headers;
 
-    public RestfulHttpResponse(Iterable<Map.Entry<String, String>> headers, String content) {
+    public SuccessfulHttpResponse(Iterable<Map.Entry<String, String>> headers, String content) {
         ArrayList<HttpHeader> list = new ArrayList<>();
         headers.forEach(e -> list.add(new HttpHeader(e)));
         this.headers = list;
@@ -42,7 +40,7 @@ public class RestfulHttpResponse {
     public String toString() {
         StringJoiner joiner = new StringJoiner(",");
         headers.forEach(h -> joiner.add(h.getKey() + ":" + h.getValue()));
-        return "RestfulHttpResponse{" +
+        return "SuccessfulHttpResponse{" +
                "content='" + content + '\'' +
                ", headers=" + joiner +
                '}';
