@@ -60,7 +60,7 @@ public class HttpClientManager {
         HttpClientCodec messageCodec = new HttpClientCodec();
         ChannelInboundHandlerAdapter activeAdapter = new ChannelInboundHandlerAdapter() {
             @Override
-            public void channelActive(ChannelHandlerContext ctx) throws Exception {
+            public void channelActive(ChannelHandlerContext ctx) {
                 offerTask(ctx.channel());
                 ctx.fireChannelActive();
             }

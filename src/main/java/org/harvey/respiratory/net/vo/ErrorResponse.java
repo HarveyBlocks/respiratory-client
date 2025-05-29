@@ -1,7 +1,5 @@
 package org.harvey.respiratory.net.vo;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.Map;
