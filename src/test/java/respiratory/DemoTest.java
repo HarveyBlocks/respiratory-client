@@ -10,6 +10,7 @@ import org.harvey.respiratory.Demo;
 import org.harvey.respiratory.net.correspondence.HttpClientManager;
 import org.harvey.respiratory.net.correspondence.HttpRequestBuilder;
 import org.harvey.respiratory.net.exception.ClientRequesException;
+import org.harvey.respiratory.net.vo.ErrorResponse;
 import org.harvey.respiratory.net.vo.RestfulResult;
 import org.harvey.respiratory.net.vo.SuccessfulHttpResponse;
 import org.junit.Test;
@@ -17,7 +18,6 @@ import org.junit.Test;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
 
 /**
  * @author <a href="mailto:harvey.blocks@outlook.com">Harvey Blocks</a>
@@ -30,31 +30,6 @@ public class DemoTest {
     public static final HttpClientManager MANAGER = Demo.MANAGER;
     public static final HttpRequestBuilder REQUEST_BUILDER = Demo.REQUEST_BUILDER;
 
-
-    @Test
-    public void sendCode() {
-        SuccessfulHttpResponse response;
-        try {
-            HttpRequest request = REQUEST_BUILDER.buildPostRequest(new URI("/user/code"), "18299382839");
-            response = MANAGER.execute(request);
-        } catch (InterruptedException | URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        log.info("{}", response);
-    }
-
-    @Test
-    public void login() {
-        SuccessfulHttpResponse response;
-        try {
-            Map<String, Object> loginForm = Map.of("code", "463499", "phone", "18299382839", "password", "");
-            HttpRequest request = REQUEST_BUILDER.buildPostRequest(new URI("/user/login"), loginForm);
-            response = MANAGER.execute(request);
-        } catch (InterruptedException | URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-        log.info("{}", response);
-    }
 
     public static final String AUTHORIZATION_TOKEN =
             "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1c2VyIjoxOTIzNDMxNDM0MjQ1MTc3MzQ3LCJleHAiOjE4MzQ5MzM4MDh9.fNgh" +
@@ -88,8 +63,16 @@ public class DemoTest {
             HttpRequest request = REQUEST_BUILDER.buildGetRequest(new URI("/user/me"));
             response = MANAGER.execute(request);
         } catch (ClientRequesException ce) {
-            throw new RuntimeException(ce.getErrorResponse().toString());
+            // 可能是发送请求-响应这个过程中发生了错误, 那么需要捕获这个异常
+            ErrorResponse errorResponse = ce.getErrorResponse();
+            // 可以对错误的有关信息做出操作
+            log.error("错误码: {}", errorResponse.getCode());
+            log.error("错误描述: {}", errorResponse.getReasonPhrase());
+            log.error("错误信息文本: {}", errorResponse.getContent());
+            log.error("错误响应的响应头: {}", errorResponse.getHeaders());
+            throw new RuntimeException(errorResponse.toString());
         } catch (InterruptedException | URISyntaxException e) {
+            // 这里是客户端系统有异常
             throw new RuntimeException(e);
         }
         log.info("response = {}", response);
