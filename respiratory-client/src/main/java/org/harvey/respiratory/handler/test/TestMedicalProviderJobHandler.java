@@ -22,46 +22,56 @@ public class TestMedicalProviderJobHandler implements TestHandler, MedicalProvid
 
     @Override
     public Integer register(MedicalProviderJob job) {
-        return null;
+        bind.info("TestMedicalProviderJobHandler#register", job);
+        return bind.randomIntId();
     }
 
     @Override
     public void update(MedicalProviderJob job) {
-
+        bind.info("TestMedicalProviderJobHandler#update", job);
     }
 
     @Override
     public void del(Long id) {
-
+        bind.info("TestMedicalProviderJobHandler#del", id);
     }
 
     @Override
     public MedicalProviderJob querySelf() {
-        return null;
+        return buildEntity();
+    }
+
+    private MedicalProviderJob buildEntity() {
+        return new MedicalProviderJob(
+        );
     }
 
     @Override
     public List<MedicalProviderJob> query(Integer page, Integer limit) {
-        return null;
+        return bind.list(this::buildEntity, limit);
     }
 
     @Override
     public List<MedicalProviderJob> query(Integer page) {
-        return null;
+        return query(page, 10);
     }
 
     @Override
     public List<MedicalProviderJob> query() {
-        return null;
+        return query(1, 10);
     }
 
     @Override
     public MedicalProviderJob queryOne(Integer job) {
-        return null;
+        MedicalProviderJob entity = buildEntity();
+        entity.setId(job);
+        return entity;
     }
 
     @Override
     public List<MedicalProviderJob> queryByName(String name) {
-        return null;
+        List<MedicalProviderJob> list = bind.list(this::buildEntity);
+        list.forEach(e -> e.setName(name));
+        return list;
     }
 }

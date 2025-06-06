@@ -31,7 +31,7 @@ public interface DrugHandler extends ServerHandler {
      *
      * @param drugId 药品id
      */
-    void del(Long drugId);
+    void del(Integer drugId);
 
 
     /**
@@ -40,7 +40,7 @@ public interface DrugHandler extends ServerHandler {
      *
      * @param id 药物id
      */
-    Drug queryById(Long id);
+    Drug queryById(Integer id);
 
 
     /**

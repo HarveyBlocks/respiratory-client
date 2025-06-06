@@ -1,5 +1,6 @@
 package org.harvey.respiratory;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -57,6 +58,7 @@ public class RandomUtil {
         }
         return random.nextDouble() < probability;
     }
+
 
 
 }

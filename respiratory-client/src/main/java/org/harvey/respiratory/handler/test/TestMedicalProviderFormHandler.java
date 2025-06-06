@@ -23,51 +23,63 @@ public class TestMedicalProviderFormHandler implements TestHandler, MedicalProvi
 
     @Override
     public Integer register(MedicalProviderForm form) {
-        return null;
+        bind.info("TestMedicalProviderFormHandler#register", form);
+        return bind.randomIntId();
     }
 
     @Override
     public void update(MedicalProviderForm form) {
-
+        bind.info("TestMedicalProviderFormHandler#update", form);
     }
 
     @Override
     public void del(Long id) {
-
+        bind.info("TestMedicalProviderFormHandler#del", id);
     }
 
     @Override
     public MedicalProviderForm querySelf() {
-        return null;
+        return buildEntity();
+    }
+
+    private MedicalProviderForm buildEntity() {
+        return new MedicalProviderForm(
+        );
     }
 
     @Override
     public List<MedicalProviderForm> query(Integer page, Integer limit) {
-        return null;
+        return bind.list(this::buildEntity, limit);
     }
 
     @Override
     public List<MedicalProviderForm> query(Integer page) {
-        return null;
+        return query(page, 10);
     }
 
     @Override
     public List<MedicalProviderForm> query() {
-        return null;
+        return query(1, 10);
     }
 
     @Override
     public MedicalProviderForm queryOne(Integer form) {
-        return null;
+        MedicalProviderForm entity = buildEntity();
+        entity.setId(form);
+        return entity;
     }
 
     @Override
     public List<MedicalProviderForm> queryByName(String name) {
-        return null;
+        List<MedicalProviderForm> list = bind.list(this::buildEntity);
+        list.forEach(e -> e.setName(name));
+        return list;
     }
 
     @Override
     public List<MedicalProviderForm> queryByAddress(String address) {
-        return null;
+        List<MedicalProviderForm> list = bind.list(this::buildEntity);
+        list.forEach(e -> e.setAddress(address));
+        return list;
     }
 }

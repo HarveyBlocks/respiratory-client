@@ -23,56 +23,67 @@ public class TestMedicalProviderHandler implements TestHandler, MedicalProviderH
 
     @Override
     public Long register(MedicalProvider medicalProvider) {
-        return null;
+        return bind.randomLongId();
     }
 
     @Override
     public void update(MedicalProvider medicalProvider) {
-
+        bind.info("TestMedicalProviderHandler#update{}", medicalProvider);
     }
 
     @Override
     public void del(Long id) {
-
+        bind.info("TestMedicalProviderHandler#del{}", id);
     }
 
     @Override
     public MedicalProvider querySelf() {
-        return null;
+        return buildEntity();
+    }
+
+    private MedicalProvider buildEntity() {
+        return new MedicalProvider();
     }
 
     @Override
     public MedicalProvider queryOne(Long id) {
-        return null;
+        MedicalProvider entity = buildEntity();
+        entity.setId(id);
+        return entity;
     }
 
     @Override
     public MedicalProvider queryByPhone(String phoneNumber) {
-        return null;
+        return buildEntity();
     }
 
     @Override
     public List<MedicalProvider> query(String name, Integer form, Integer page, Integer limit) {
-        return null;
+        List<MedicalProvider> list = bind.list(this::buildEntity, limit);
+        list.forEach(e -> {
+            e.setName(name);
+            e.setDepartmentId(form);
+        });
+        return list;
     }
 
     @Override
     public List<MedicalProvider> query(String name, Integer form, Integer page) {
-        return null;
+        return query(name, form, page, 10);
     }
 
     @Override
     public List<MedicalProvider> query(String name, Integer form) {
-        return null;
+        return query(name, form, 1, 10);
     }
 
     @Override
     public List<MedicalProvider> query(String name) {
-        return null;
+        return query(name, null, 1, 10);
     }
 
     @Override
     public List<MedicalProvider> query() {
-        return null;
+        return query(null, null, 1, 10);
     }
 }

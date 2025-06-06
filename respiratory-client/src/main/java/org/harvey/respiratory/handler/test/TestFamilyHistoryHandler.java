@@ -7,6 +7,8 @@ import org.harvey.respiratory.pojo.enums.clinic.FamilyRelationship;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * 家族史接口
@@ -25,86 +27,104 @@ public class TestFamilyHistoryHandler implements TestHandler, FamilyHistoryHandl
 
     @Override
     public Long register(FamilyHistory familyHistory) {
-        return null;
+        return bind.randomLongId();
     }
 
     @Override
     public List<FamilyHistory> queryFamilyHistory(Long patientId, Integer page, Integer limit) {
-        return null;
+        List<FamilyHistory> list = bind.list(this::buildEntity, limit);
+        list.forEach(e -> e.setPatientId(patientId));
+        return list;
+    }
+
+    private FamilyHistory buildEntity() {
+        return new FamilyHistory();
     }
 
     @Override
     public List<FamilyHistory> queryFamilyHistory(Long patientId, Integer page) {
-        return null;
+        return queryFamilyHistory(patientId, page, 10);
     }
 
     @Override
     public List<FamilyHistory> queryFamilyHistory(Long patientId) {
-        return null;
+        return queryFamilyHistory(patientId, 1, 10);
     }
 
     @Override
     public List<FamilyHistory> queryFamilyHistoryByName(
-            Long patientId,
-            String diseaseName,
-            Integer page,
-            Integer limit) {
-        return null;
+            Long patientId, String diseaseName, Integer page, Integer limit) {
+        List<FamilyHistory> list = bind.list(this::buildEntity, limit);
+        list.forEach(e -> {
+            e.setPatientId(patientId);
+        });
+        return list;
     }
 
     @Override
     public List<FamilyHistory> queryFamilyHistoryByName(Long patientId, String diseaseName, Integer page) {
-        return null;
+        return queryFamilyHistoryByName(patientId, diseaseName, page, 10);
     }
 
     @Override
     public List<FamilyHistory> queryFamilyHistoryByName(Long patientId, String diseaseName) {
-        return null;
+        return queryFamilyHistoryByName(patientId, diseaseName, 1, 10);
     }
 
     @Override
     public List<FamilyHistory> queryFamilyHistoryByDiseaseId(
-            Long patientId,
-            Integer diseaseId,
-            Integer page,
-            Integer limit) {
-        return null;
+            Long patientId, Integer diseaseId, Integer page, Integer limit) {
+        List<FamilyHistory> list = bind.list(this::buildEntity, limit);
+        list.forEach(e -> {
+            e.setPatientId(patientId);
+            e.setDiseaseId(diseaseId);
+        });
+        return list;
     }
 
     @Override
     public List<FamilyHistory> queryFamilyHistoryByDiseaseId(Long patientId, Integer diseaseId, Integer page) {
-        return null;
+        return queryFamilyHistoryByDiseaseId(patientId, diseaseId, page, 10);
     }
 
     @Override
     public List<FamilyHistory> queryFamilyHistoryByDiseaseId(Long patientId, Integer diseaseId) {
-        return null;
+        return queryFamilyHistoryByDiseaseId(patientId, diseaseId, 1, 10);
     }
 
     @Override
     public List<FamilyHistory> queryFamilyHistoryByRelationship(
-            Long patientId,
-            Set<FamilyRelationship> relationships,
-            Integer page,
-            Integer limit) {
-        return null;
+            Long patientId, Set<FamilyRelationship> relationships, Integer page, Integer limit) {
+        List<FamilyHistory> list = bind.list(this::buildEntity, limit);
+        FamilyRelationship[] array = relationships.toArray(FamilyRelationship[]::new);
+        list.forEach(e -> {
+            e.setPatientId(patientId);
+            e.setFamilyRelationshipId(bind.chose(array).ordinal());
+        });
+        return list;
     }
 
     @Override
     public List<FamilyHistory> queryFamilyHistoryByRelationship(
-            Long patientId,
-            Set<FamilyRelationship> relationships,
-            Integer page) {
-        return null;
+            Long patientId, Set<FamilyRelationship> relationships, Integer page) {
+        return queryFamilyHistoryByRelationship(patientId, relationships, page, 10);
     }
 
     @Override
     public List<FamilyHistory> queryFamilyHistoryByRelationship(Long patientId, Set<FamilyRelationship> relationships) {
-        return null;
+        return queryFamilyHistoryByRelationship(patientId, relationships, 1, 10);
     }
 
     @Override
     public List<FamilyRelationshipEntity> queryFamilyRelationship(Integer page, Integer limit) {
-        return null;
+
+        return IntStream.range(0, limit).mapToObj(i -> buildRelationshipEntity()).collect(Collectors.toList());
+    }
+
+    private FamilyRelationshipEntity buildRelationshipEntity() {
+        FamilyRelationship chose = bind.chose(FamilyRelationship.values());
+        return new FamilyRelationshipEntity(bind.randomIntId(), chose.name(), bind.randomShortString(),
+                chose.isFirstDegreeRelative()
+        );
     }
 }

@@ -23,6 +23,19 @@ public class TestExpenseRecordHandler implements TestHandler, ExpenseRecordHandl
 
     @Override
     public List<ExpenseRecord> querySelfExpenseRecord(Long visitId) {
-        return null;
+        List<ExpenseRecord> list = bind.list(this::buildEntity);
+        list.forEach(e -> e.setVisitDoctorId(visitId));
+        return list;
+    }
+
+    private ExpenseRecord buildEntity() {
+        return new ExpenseRecord(
+                bind.randomLongId(),
+                bind.randomLongId(),
+                bind.randomLongString(),
+                bind.uniform(200,20000),
+                bind.uniform(1,5),
+                bind.randomLongString()
+        );
     }
 }

@@ -24,7 +24,7 @@ public class TestDiseaseHandler implements DiseaseHandler, TestHandler {
 
     @Override
     public void del(Integer diseaseId) {
-        /*ignore*/
+        bind.info("DiseaseHandler#del{}", diseaseId);
     }
 
     private Disease buildDisease() {

@@ -32,7 +32,7 @@ public class TransmitDrugHandler implements DrugHandler, TransmitHandler {
     }
 
     @Override
-    public void del(Long drugId) {
+    public void del(Integer drugId) {
         bind.executeSimply(
                 HttpMethod.DELETE, uriJoin.add(drugId),
                 new TypeReference<RestfulResult<NullPlaceholder>>() {
@@ -41,7 +41,7 @@ public class TransmitDrugHandler implements DrugHandler, TransmitHandler {
     }
 
     @Override
-    public Drug queryById(Long id) {
+    public Drug queryById(Integer id) {
         return bind.executeSimply(
                 HttpMethod.GET, uriJoin.add(id),
                 new TypeReference<>() {

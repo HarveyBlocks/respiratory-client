@@ -25,46 +25,56 @@ public class TestPatientHandler implements TestHandler, PatientHandler {
 
     @Override
     public Long registerPatientInformation(PatientDto patientDto) {
-        return null;
+        return bind.randomLongId();
     }
 
     @Override
     public void delPatientInformation(Long patientId) {
-
+        bind.info("TestPatientHandler#delPatientInformation{}", patientId);
     }
 
     @Override
     public void update(Patient patient) {
-
+        bind.info("TestPatientHandler#update{}", patient);
     }
 
     @Override
     public List<PatientDto> querySelfPatients(Integer page, Integer limit) {
-        return null;
+        return bind.list(this::buildEntity, limit);
+    }
+
+    private PatientDto buildEntity() {
+        return new PatientDto();
     }
 
     @Override
     public List<PatientDto> querySelfPatients(Integer page) {
-        return null;
+        return querySelfPatients(page, 10);
     }
 
     @Override
     public List<PatientDto> querySelfPatients() {
-        return null;
+        return querySelfPatients(1, 10);
     }
 
     @Override
     public PatientDto queryPatientByHealthcareId(String healthcareCode) {
-        return null;
+        PatientDto entity = buildEntity();
+        entity.setHealthcareCode(healthcareCode);
+        return entity;
     }
 
     @Override
     public PatientDto queryPatientByPatientId(Long patientId) {
-        return null;
+        PatientDto entity = buildEntity();
+        entity.setId(patientId);
+        return entity;
     }
 
     @Override
     public PatientDto queryByIdentity(String cardId) {
-        return null;
+        PatientDto entity = buildEntity();
+        entity.setIdentityCardId(cardId);
+        return entity;
     }
 }

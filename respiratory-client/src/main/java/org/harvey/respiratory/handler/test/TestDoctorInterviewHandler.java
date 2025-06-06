@@ -18,6 +18,6 @@ public class TestDoctorInterviewHandler implements TestHandler, DoctorInterviewH
 
     @Override
     public void interview(InterviewDto interviewDto) {
-        /*ignore*/
+        bind.info("DoctorInterviewHandler#interview{}", interviewDto);
     }
 }

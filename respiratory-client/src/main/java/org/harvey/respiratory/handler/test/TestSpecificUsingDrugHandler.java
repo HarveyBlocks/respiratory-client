@@ -25,41 +25,60 @@ public class TestSpecificUsingDrugHandler implements TestHandler, SpecificUsingD
 
     @Override
     public void del(Long id) {
-
+        bind.info("TestSpecificUsingDrugHandler#del{}", id);
     }
 
     @Override
     public void del(Long visitDoctorId, Long drugId) {
-
+        bind.info("TestSpecificUsingDrugHandler#del{}{}", visitDoctorId, drugId);
     }
 
     @Override
     public Long updatePatientDrugHistory(SpecificUsingDrugRecord specificUsing) {
-        return null;
+        return bind.randomLongId();
     }
 
     @Override
     public List<DrugDto> queryDrugInVisit(Long visitId) {
-        return null;
+        List<DrugDto> list = bind.list(this::buildEntity);
+        list.forEach(e -> e.getSpecificUsingDrugRecord().setVisitDoctorId(visitId));
+        return list;
+    }
+
+    private DrugDto buildEntity() {
+        return new DrugDto();
     }
 
     @Override
     public List<DrugDto> queryPatientDrugHistoryByDrug(Long patientId, String name) {
-        return null;
+        List<DrugDto> list = bind.list(this::buildEntity);
+        list.forEach(e -> {
+            e.getSpecificUsingDrugRecord().setPatientId(patientId);
+            e.getDrug().setName(name);
+        });
+        return list;
     }
 
     @Override
     public List<DrugDto> queryPatientDrugHistoryByDate(Long patientId, Date startDate, Date endDate) {
-        return null;
+        List<DrugDto> list = bind.list(this::buildEntity);
+        list.forEach(e -> {
+            SpecificUsingDrugRecord record = e.getSpecificUsingDrugRecord();
+            record.setPatientId(patientId);
+            java.util.Date start = bind.randomDate(startDate, endDate);
+            record.setTreatStart(start);
+            record.setTreatEnd(bind.randomDate(start, endDate));
+        });
+        return list;
     }
 
     @Override
     public List<DrugDto> queryPatientDrugHistoryByDate(Long patientId, Date startDate) {
-        return null;
+        return queryPatientDrugHistoryByDate(patientId, startDate, null);
     }
 
     @Override
     public List<DrugDto> queryPatientDrugHistoryByDate(Long patientId) {
-        return null;
+        return queryPatientDrugHistoryByDate(patientId, null, null);
     }
 }

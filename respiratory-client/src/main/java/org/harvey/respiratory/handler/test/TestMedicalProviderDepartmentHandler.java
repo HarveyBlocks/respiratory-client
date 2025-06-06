@@ -23,46 +23,56 @@ public class TestMedicalProviderDepartmentHandler implements TestHandler, Medica
 
     @Override
     public Integer register(MedicalProviderDepartment department) {
-        return null;
+        bind.info("TestMedicalProviderDepartmentHandler#register", department);
+        return bind.randomIntId();
     }
 
     @Override
     public void update(MedicalProviderDepartment department) {
-
+        bind.info("TestMedicalProviderDepartmentHandler#update", department);
     }
 
     @Override
     public void del(Long id) {
-
+        bind.info("TestMedicalProviderDepartmentHandler#del", id);
     }
 
     @Override
     public MedicalProviderDepartment querySelf() {
-        return null;
+        return buildEntity();
+    }
+
+    private MedicalProviderDepartment buildEntity() {
+        return new MedicalProviderDepartment(
+        );
     }
 
     @Override
     public List<MedicalProviderDepartment> query(Integer page, Integer limit) {
-        return null;
+        return bind.list(this::buildEntity, limit);
     }
 
     @Override
     public List<MedicalProviderDepartment> query(Integer page) {
-        return null;
+        return query(page, 10);
     }
 
     @Override
     public List<MedicalProviderDepartment> query() {
-        return null;
+        return query(1, 10);
     }
 
     @Override
     public MedicalProviderDepartment queryOne(Integer department) {
-        return null;
+        MedicalProviderDepartment entity = buildEntity();
+        entity.setId(department);
+        return entity;
     }
 
     @Override
     public List<MedicalProviderDepartment> queryByName(String name) {
-        return null;
+        List<MedicalProviderDepartment> list = bind.list(this::buildEntity);
+        list.forEach(e -> e.setName(name));
+        return list;
     }
 }

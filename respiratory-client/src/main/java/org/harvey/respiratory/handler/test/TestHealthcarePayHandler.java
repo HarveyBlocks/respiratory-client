@@ -22,16 +22,16 @@ public class TestHealthcarePayHandler implements TestHandler, HealthcarePayHandl
 
     @Override
     public void pay(Long visitId) {
-
+        bind.info("TestHealthcarePayHandler#pay{}", visitId);
     }
 
     @Override
     public Integer rechargeByHealthcare(RechargeDto rechargeDto) {
-        return null;
+        return bind.uniform(rechargeDto.getAmount(), rechargeDto.getAmount() + 10000);
     }
 
     @Override
     public Integer queryBalance(QueryBalanceDto queryBalanceDto) {
-        return null;
+        return bind.uniform(0, 100000);
     }
 }
