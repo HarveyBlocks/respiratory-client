@@ -7,5 +7,4 @@ package org.harvey.respiratory.client;
  */
 public class ServerHandlerRegisterFactory {
     public static final ServerHandlerRegister TEST = new TestServerHandlerRegister();
-    public static final ServerHandlerRegister DEV = new TransmitServerHandlerRegister();
 }
