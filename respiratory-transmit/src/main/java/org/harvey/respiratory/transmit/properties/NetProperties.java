@@ -1,9 +1,12 @@
 package org.harvey.respiratory.transmit.properties;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -13,15 +16,23 @@ import java.util.Properties;
  * @version 1.0
  * @date 2025-05-08 12:51
  */
+@Slf4j
 public class NetProperties {
     public static final NetProperties DEFAULT;
 
     static {
+        NetProperties defaultProperties;
         try (Reader reader = new FileReader("src/main/resources/net.properties")) {
-            DEFAULT = new NetProperties(reader);
+            defaultProperties = new NetProperties(reader);
         } catch (IOException e) {
-            throw new RuntimeException("打开配置文件失败", e);
+            defaultProperties = new NetProperties(Map.of("response.field.code", "code",
+                    "response.field.message", "msg",
+                    "response.field.data", "data",
+                    "server.host", "localhost",
+                    "server.port", "8080"));
+            log.warn("打开配置文件失败, 使用默认配置");
         }
+        DEFAULT = defaultProperties;
     }
 
     private final Properties properties;
@@ -34,6 +45,11 @@ public class NetProperties {
     NetProperties(InputStream inputStream) throws IOException {
         this.properties = new Properties();
         properties.load(inputStream);
+    }
+
+    public NetProperties(Map<String, String> t) {
+        this.properties = new Properties();
+        properties.putAll(t);
     }
 
     public String get(PropertyName propertyName) {
